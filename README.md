@@ -1,17 +1,17 @@
-# LinguaCloud — GCP Edition
+# Cloud-Based Language Translation System (GCP
 
 Same project as the AWS version, rebuilt on Google Cloud, with the raw
 backend URLs hidden from the browser via Firebase Hosting.
 
-## Service mapping (AWS → GCP)
+## Services
 
-| AWS                  | GCP                              |
-|-----------------------|-----------------------------------|
-| Amazon Translate       | Cloud Translation API (Advanced, v3) |
-| AWS Lambda              | Cloud Functions (2nd gen)        |
-| API Gateway             | Firebase Hosting rewrites        |
-| S3                      | Cloud Storage (GCS)               |
-| DynamoDB                | Firestore (Native mode)           |
+| GCP                              |
+|-----------------------------------|
+| Cloud Translation API (Advanced, v3) |
+| Cloud Functions (2nd gen)        |
+| Firebase Hosting rewrites        |
+| Cloud Storage (GCS)               |
+| Firestore (Native mode)           |
 
 ## Why Firebase Hosting is in here
 
