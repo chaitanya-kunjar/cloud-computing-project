@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "public": "frontend",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/api/translate",
+        "function": { "functionId": "translateText", "region": "us-central1" }
+      },
+      {
+        "source": "/api/translate-document",
+        "function": { "functionId": "translateDocument", "region": "us-central1" }
+      },
+      {
+        "source": "/api/history",
+        "function": { "functionId": "getHistory", "region": "us-central1" }
+      }
+    ]
+  }
+}
