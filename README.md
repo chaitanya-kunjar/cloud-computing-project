@@ -1,4 +1,4 @@
-# Cloud-Based Language Translation System (GCP
+# Cloud-Based Language Translation System (GCP)
 
 Same project as the AWS version, rebuilt on Google Cloud, with the raw
 backend URLs hidden from the browser via Firebase Hosting.
