@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud-Based Language Translation System</title>
+<style>
+  :root {
+    --ink: #16232e; --ink-soft: #4a5a68; --line: #d9e0e6; --bg: #f4f7f9;
+    --panel: #ffffff; --accent: #1a73e8; --accent-dark: #135cbf; --accent-soft: #e8f0fe;
+    --radius: 10px; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  header { padding: 28px 24px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header .brand { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  header .brand span { color: var(--accent); }
+  header .tagline { color: var(--ink-soft); font-size: 13px; margin-top: 4px; }
+  main { max-width: 880px; margin: 0 auto; padding: 24px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab-btn { padding: 9px 16px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; font-size: 13px; cursor: pointer; color: var(--ink-soft); }
+  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; display: none; }
+  .panel.active { display: block; }
+  .row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .row > div { flex: 1; }
+  label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; }
+  select, textarea, input[type="file"] { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: #fff; }
+  textarea { resize: vertical; min-height: 110px; font-family: inherit; }
+  .swap-btn { align-self: flex-end; margin-bottom: 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 15px; color: var(--accent); }
+  .primary-btn { background: var(--accent); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
+  .primary-btn:hover { background: var(--accent-dark); }
+  .output-box { margin-top: 14px; padding: 14px; background: var(--accent-soft); border-radius: 8px; font-size: 14px; min-height: 40px; white-space: pre-wrap; }
+  .status { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+  .status.error { color: #b3261e; }
+  .download-link { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--accent); }
+  .history-item { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .history-item:last-child { border-bottom: none; }
+  .history-meta { color: var(--ink-soft); font-size: 11px; margin-top: 4px; }
+  .refresh-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--ink-soft); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><h1>Cloud-Based Language Translation System (GCP)</h1></div>
+  <div class="tagline">Cloud Translation API · Cloud Functions · Cloud Storage · Firestore — served via Firebase Hosting</div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="text">Translate text</button>
+    <button class="tab-btn" data-tab="doc">Translate document</button>
+    <button class="tab-btn" data-tab="history">History</button>
+  </div>
+
+  <section id="text" class="panel active">
+    <div class="row">
+      <div>
+        <label for="srcLangText">Source language</label>
+        <select id="srcLangText">
+          <option value="auto">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="ta">Tamil</option>
+          <option value="te">Telugu</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese (Simplified)</option>
+        </select>
+      </div>
+      <button class="swap-btn" onclick="swapLangs()" title="Swap languages">⇄</button>
+      <div>
+        <label for="tgtLangText">Target language</label>
+        <select id="tgtLangText">
+          <option value="hi">Hindi</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="ta">Tamil</option>
+          <option value="te">Telugu</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese (Simplified)</option>
+        </select>
+      </div>
+    </div>
+    <label for="srcText">Text to translate</label>
+    <textarea id="srcText" placeholder="Type or paste text here..."></textarea>
+    <div style="margin-top:12px;">
+      <button class="primary-btn" onclick="translateText()">Translate</button>
+    </div>
+    <div id="textStatus" class="status"></div>
+    <div id="textOutput" class="output-box" style="display:none;"></div>
+  </section>
+
+  <section id="doc" class="panel">
+    <div class="row">
+      <div>
+        <label for="srcLangDoc">Source language</label>
+        <select id="srcLangDoc">
+          <option value="auto">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+      <div>
+        <label for="tgtLangDoc">Target language</label>
+        <select id="tgtLangDoc">
+          <option value="hi">Hindi</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+    </div>
+    <label for="fileInput">Document (.txt, .html, .pdf, .docx, .pptx, .xlsx)</label>
+    <input id="fileInput" type="file" accept=".txt,.html,.pdf,.docx,.pptx,.xlsx">
+    <div style="margin-top:8px;">
+      <button class="primary-btn" onclick="translateDocument()">Translate document</button>
+    </div>
+    <div id="docStatus" class="status"></div>
+    <div id="docOutput"></div>
+  </section>
+
+  <section id="history" class="panel">
+    <button class="refresh-btn" onclick="loadHistory()">Refresh history</button>
+    <div id="historyList" style="font-size:13px;color:var(--ink-soft);">No history loaded yet.</div>
+  </section>
+</main>
+
+<script>
+// NOTE: these are same-origin relative paths. Firebase Hosting rewrites
+// (see firebase.json) proxy them to the real Cloud Functions server-side —
+// the browser never sees the actual Cloud Function URLs.
+const TEXT_ENDPOINT = '/api/translate';
+const DOC_ENDPOINT = '/api/translate-document';
+const HISTORY_ENDPOINT = '/api/history';
+const USER_ID = "demo-user";
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function swapLangs() {
+  const s = document.getElementById('srcLangText');
+  const t = document.getElementById('tgtLangText');
+  if (s.value === 'auto') return;
+  [s.value, t.value] = [t.value, s.value];
+}
+
+async function translateText() {
+  const statusEl = document.getElementById('textStatus');
+  const outputEl = document.getElementById('textOutput');
+  const text = document.getElementById('srcText').value.trim();
+
+  if (!text) { statusEl.textContent = 'Enter some text to translate.'; statusEl.className = 'status error'; return; }
+
+  statusEl.textContent = 'Translating...';
+  statusEl.className = 'status';
+  outputEl.style.display = 'none';
+
+  try {
+    const res = await fetch(TEXT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: USER_ID,
+        text: text,
+        sourceLanguageCode: document.getElementById('srcLangText').value,
+        targetLanguageCode: document.getElementById('tgtLangText').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Translation failed');
+
+    outputEl.textContent = data.translatedText;
+    outputEl.style.display = 'block';
+    statusEl.textContent = `Detected/used source language: ${data.sourceLanguageCode}`;
+  } catch (err) {
+    statusEl.textContent = err.message;
+    statusEl.className = 'status error';
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function mimeTypeFor(fileName) {
+  if (fileName.endsWith('.html')) return 'text/html';
+  if (fileName.endsWith('.pdf')) return 'application/pdf';
+  if (fileName.endsWith('.docx')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  if (fileName.endsWith('.pptx')) return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+  if (fileName.endsWith('.xlsx')) return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  return 'text/plain';
+}
+
+async function translateDocument() {
+  const statusEl = document.getElementById('docStatus');
+  const outputEl = document.getElementById('docOutput');
+  const fileInput = document.getElementById('fileInput');
+
+  if (!fileInput.files.length) { statusEl.textContent = 'Choose a file first.'; statusEl.className = 'status error'; return; }
+
+  const file = fileInput.files[0];
+  statusEl.textContent = 'Uploading and translating...';
+  statusEl.className = 'status';
+  outputEl.innerHTML = '';
+
+  try {
+    const base64 = await fileToBase64(file);
+    const res = await fetch(DOC_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: USER_ID,
+        fileName: file.name,
+        mimeType: mimeTypeFor(file.name),
+        sourceLanguageCode: document.getElementById('srcLangDoc').value,
+        targetLanguageCode: document.getElementById('tgtLangDoc').value,
+        fileContentBase64: base64
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Translation failed');
+
+    statusEl.textContent = 'Done.';
+    const blob = base64ToBlob(data.translatedContentBase64, data.mimeType);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `translated_${data.fileName}`;
+    link.className = 'download-link';
+    link.textContent = `Download translated_${data.fileName}`;
+    outputEl.appendChild(link);
+  } catch (err) {
+    statusEl.textContent = err.message;
+    statusEl.className = 'status error';
+  }
+}
+
+function base64ToBlob(base64, mimeType) {
+  const byteChars = atob(base64);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+  return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+}
+
+async function loadHistory() {
+  const listEl = document.getElementById('historyList');
+  listEl.textContent = 'Loading...';
+  try {
+    const res = await fetch(`${HISTORY_ENDPOINT}?userId=${USER_ID}&limit=20`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load history');
+
+    if (!data.items.length) { listEl.textContent = 'No translations yet.'; return; }
+
+    listEl.innerHTML = data.items.map(item => `
+      <div class="history-item">
+        ${item.type === 'text'
+          ? `<strong>${escapeHtml(item.sourceText || '')}</strong> → ${escapeHtml(item.translatedText || '')}`
+          : `Document: <strong>${escapeHtml(item.fileName || '')}</strong>`}
+        <div class="history-meta">${item.sourceLanguageCode} → ${item.targetLanguageCode} · ${item.timestamp}</div>
+      </div>
+    `).join('');
+  } catch (err) {
+    listEl.textContent = err.message;
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
